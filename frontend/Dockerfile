@@ -2,10 +2,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files (context is already ./frontend)
 COPY package*.json ./
 
-RUN npm ci
+# Use npm install instead of npm ci since no package-lock.json in repo
+RUN npm install
 
 COPY . .
 
