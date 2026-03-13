@@ -1,0 +1,11 @@
+# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+node_modules
+npm-debug.log
+dist
+.env
+.git
+.gitignore
+README.md
+.angular/cache
+.angular/ide
+coverage

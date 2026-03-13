@@ -1,0 +1,57 @@
+
+> spotify-clone-backend@1.0.0 start
+> nest start
+
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m[38;5;3m +28ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mThrottlerModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+this.apiKey AIzaSyAOK8LkxFYA6KUlb_uPHwVIKICPhGzejZc
+this.apiKey AIzaSyAOK8LkxFYA6KUlb_uPHwVIKICPhGzejZc
+this.apiKey AIzaSyAOK8LkxFYA6KUlb_uPHwVIKICPhGzejZc
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:44 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +20ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseCoreModule dependencies initialized[39m[38;5;3m +588ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m[38;5;3m +12ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMongooseModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mQueueModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSongsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPlaylistsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/api}:[39m[38;5;3m +8ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api, GET} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/health, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/callback, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/profile, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSongsController {/api/songs}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/songs/search, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/songs/recent, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/songs/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/songs/cache/stats, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPlaylistsController {/api/playlists}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists/import, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists/:id/songs/:songId, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists/:id/songs/:songId, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/playlists/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mQueueController {/api/queue}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue/add/:songId, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue/remove/:songId, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue/clear, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue/play/:songId, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue/sleep-timer, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/queue/sleep-timer, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 5812  - [39m14/03/2026, 2:03:45 am [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +3ms[39m
+🚀 Server running on http://localhost:4000
+📖 API available at http://localhost:4000/api
+Terminate batch job (Y/N)? 

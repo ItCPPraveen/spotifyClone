@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: spotify-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - spotify-network
+
+  redis:
+    image: redis:latest
+    container_name: spotify-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - spotify-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spotify-api
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/spotify-clone?authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key}
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:4200
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - spotify-network
+    volumes:
+      - ./backend/src:/app/src
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: spotify-web
+    ports:
+      - "4200:4200"
+    environment:
+      API_URL: http://localhost:3001/api
+    depends_on:
+      - backend
+    networks:
+      - spotify-network
+    volumes:
+      - ./frontend/src:/app/src
+
+volumes:
+  mongo_data:
+  redis_data:
+
+
+networks:
+  spotify-network:
+    driver: bridge

@@ -1,0 +1,102 @@
+/* ─── Reset ──────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ─── Design Tokens ──────────────────────────────────────── */
+:root {
+  --accent:        #e53e3e;   /* vibrant red */
+  --accent-dark:   #c53030;
+  --accent-glow:   rgba(229,62,62,0.35);
+  --bg:            #0d0d0d;
+  --surface:       #181818;
+  --surface-2:     #242424;
+  --surface-3:     #2e2e2e;
+  --border:        rgba(255,255,255,0.08);
+  --text:          #ffffff;
+  --text-muted:    #a0aec0;
+  --text-dim:      #718096;
+  --radius:        12px;
+  --radius-sm:     8px;
+  --shadow-glow:   0 0 24px var(--accent-glow);
+}
+
+/* ─── Base ───────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%       { box-shadow: 0 0 0 8px transparent; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-fadeIn  { animation: fadeIn  0.25s ease-out; }
+.animate-slideUp { animation: slideUp 0.3s  ease-out; }
+.animate-spin    { animation: spin    1s linear infinite; }
+
+/* ─── Drag & Drop ────────────────────────────────────────── */
+.cdk-drag-preview {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--accent) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-glow) !important;
+  opacity: 0.95;
+}
+.cdk-drag-placeholder { opacity: 0.3; }
+.cdk-drag-animating   { transition: transform 220ms ease; }
+.cdk-drop-list-dragging .queue-item:not(.cdk-drag-placeholder) {
+  transition: transform 220ms ease;
+}
+
+/* ─── Progress bar ───────────────────────────────────────── */
+.progress-track {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.05s linear;
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.progress-track:hover .progress-fill::after { opacity: 1; }
