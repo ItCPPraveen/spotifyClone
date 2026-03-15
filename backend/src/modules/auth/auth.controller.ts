@@ -13,7 +13,10 @@ export class AuthController {
     @Get('login')
     async getAuthUrl() {
         const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
-        const redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI');
+        const renderUrl = process.env.RENDER_EXTERNAL_URL;
+        const redirectUri = renderUrl 
+            ? `${renderUrl}/api/auth/callback` 
+            : this.configService.get<string>('GOOGLE_REDIRECT_URI');
 
         if (!clientId || !redirectUri) {
             throw new BadRequestException('Google OAuth configuration is missing');
