@@ -37,7 +37,7 @@ services:
   - type: web
     name: spotifyhehe-frontend
     runtime: static
-    buildCommand: cd frontend && npm ci && npm run build:prod
+    buildCommand: cd frontend && npm install && npm run build:prod
     staticPublishPath: ./frontend/dist/spotify-clone
     pullRequestPreviewsEnabled: false
     routes:
