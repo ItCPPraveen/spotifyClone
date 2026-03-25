@@ -1,12 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { QueueActions } from '@store/queue';
+import { playlistSelectors, PlaylistActions } from '@store/playlists';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-song-card',
   template: `
     <div
-      class="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition transform hover:scale-105"
+      class="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-700 transition transform hover:scale-105 relative"
       (click)="onClickCard()"
     >
       <img
@@ -27,30 +29,101 @@ import { QueueActions } from '@store/queue';
           {{ song.api_source }}
         </span>
       </div>
-      <div class="mt-3 text-sm text-gray-400">💡 Click to queue</div>
+      <div class="mt-3 flex justify-between items-center relative">
+        <div class="text-sm text-gray-400">💡 Click to play</div>
+        <div class="flex gap-2 relative">
+          <!-- Add to Playlist Button -->
+          <button
+            (click)="togglePlaylistMenu($event)"
+            title="Add to Playlist"
+            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 hover:bg-purple-500 text-white transition-colors focus:outline-none shadow-md text-xs font-bold"
+          >
+            +P
+          </button>
+          
+          <!-- Playlist Dropdown Menu -->
+          <div *ngIf="showPlaylistMenu" class="absolute bottom-full right-0 mb-2 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-xl z-50 overflow-hidden">
+            <div class="px-3 py-2 border-b border-gray-700 font-bold text-xs text-gray-300">Add to Playlist</div>
+            <div class="max-h-40 overflow-y-auto">
+              <div *ngIf="(playlists$ | async)?.length === 0" class="px-3 py-2 text-xs text-gray-500">No playlists available</div>
+              <button 
+                *ngFor="let p of playlists$ | async" 
+                (click)="addToPlaylist($event, p._id, p.name)"
+                class="w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-800 truncate transition-colors"
+              >
+                {{ p.name }}
+              </button>
+            </div>
+            <div class="border-t border-gray-700 bg-gray-950 p-1">
+              <!-- Helper to close -->
+              <button (click)="togglePlaylistMenu($event)" class="w-full text-center text-xs text-gray-500 py-1 hover:text-white">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Add to Queue Button -->
+          <button
+            (click)="onAddQueue($event)"
+            title="Add to Queue"
+            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 hover:bg-green-500 text-white transition-colors focus:outline-none shadow-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   `,
   styles: []
 })
-export class SongCardComponent {
+export class SongCardComponent implements OnInit {
   @Input() song: any;
-  @Output() addedToQueue = new EventEmitter<string>();
+  
+  playlists$!: Observable<any[]>;
+  showPlaylistMenu = false;
 
   constructor(private store: Store) { }
 
-  onClickCard() {
-    this.store.dispatch(QueueActions.addToQueue({ songId: this.song._id }));
-    this.addedToQueue.emit(this.song._id);
-
-    // Show toast notification
-    this.showSuccessToast();
+  ngOnInit() {
+    this.playlists$ = this.store.select(playlistSelectors.selectAllPlaylists);
   }
 
-  private showSuccessToast() {
+  onClickCard() {
+    this.store.dispatch(QueueActions.clearQueue());
+    // Give state a fraction of a second to clear before initiating the new play context
+    setTimeout(() => {
+        this.store.dispatch(QueueActions.playSong({ songId: this.song._id }));
+    }, 100);
+    this.showToast(`▶️ Playing "${this.song.title}"`);
+  }
+
+  onAddQueue(event: Event) {
+    event.stopPropagation();
+    this.showPlaylistMenu = false;
+    this.store.dispatch(QueueActions.addToQueue({ songId: this.song._id }));
+    this.showToast(`✅ "${this.song.title}" added to queue!`);
+  }
+
+  togglePlaylistMenu(event: Event) {
+    event.stopPropagation();
+    this.showPlaylistMenu = !this.showPlaylistMenu;
+    if (this.showPlaylistMenu) {
+      this.store.dispatch(PlaylistActions.loadPlaylists());
+    }
+  }
+
+  addToPlaylist(event: Event, playlistId: string, playlistName: string) {
+    event.stopPropagation();
+    this.showPlaylistMenu = false;
+    this.store.dispatch(PlaylistActions.addSongToPlaylist({ playlistId, songId: this.song._id }));
+    this.showToast(`✅ Added to "${playlistName}"`);
+  }
+
+  private showToast(message: string) {
     const toast = document.createElement('div');
     toast.className =
-      'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-pulse';
-    toast.textContent = `✅ "${this.song.title}" added to queue!`;
+      'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-pulse z-[9999]';
+    toast.textContent = message;
     document.body.appendChild(toast);
 
     setTimeout(() => {

@@ -5,35 +5,34 @@ import { QueueService } from './queue.service';
 export class QueueController {
     constructor(private queueService: QueueService) { }
 
+    private getUserId(req: any): string {
+        return req.user?.id || req.headers['x-device-id'] || 'anonymous_user';
+    }
+
     @Get()
     async getQueue(@Request() req: any) {
-        const userId = req.user?.id || 'anonymous_user';
-        return this.queueService.getQueue(userId);
+        return this.queueService.getQueue(this.getUserId(req));
     }
 
     @Post('add/:songId')
     async addToQueue(@Request() req: any, @Param('songId') songId: string) {
-        const userId = req.user?.id || 'anonymous_user';
-        return this.queueService.addToQueue(userId, songId);
+        return this.queueService.addToQueue(this.getUserId(req), songId);
     }
 
     @Delete('remove/:songId')
     async removeFromQueue(@Request() req: any, @Param('songId') songId: string) {
-        const userId = req.user?.id || 'anonymous_user';
-        return this.queueService.removeFromQueue(userId, songId);
+        return this.queueService.removeFromQueue(this.getUserId(req), songId);
     }
 
     @Delete('clear')
     async clearQueue(@Request() req: any) {
-        const userId = req.user?.id || 'anonymous_user';
-        await this.queueService.clearQueue(userId);
+        await this.queueService.clearQueue(this.getUserId(req));
         return { message: 'Queue cleared' };
     }
 
     @Post('play/:songId')
     async setCurrentSong(@Request() req: any, @Param('songId') songId: string) {
-        const userId = req.user?.id || 'anonymous_user';
-        return this.queueService.setCurrentSong(userId, songId);
+        return this.queueService.setCurrentSong(this.getUserId(req), songId);
     }
 
     @Post('sleep-timer')
@@ -41,15 +40,13 @@ export class QueueController {
         @Request() req: any,
         @Body() dto: { duration_minutes: number },
     ) {
-        const userId = req.user?.id || 'anonymous_user';
         const durationMs = dto.duration_minutes * 60 * 1000;
-        return this.queueService.setSleepTimer(userId, durationMs);
+        return this.queueService.setSleepTimer(this.getUserId(req), durationMs);
     }
 
     @Get('sleep-timer')
     async getSleepTimer(@Request() req: any) {
-        const userId = req.user?.id || 'anonymous_user';
-        return this.queueService.getSleepTimer(userId);
+        return this.queueService.getSleepTimer(this.getUserId(req));
     }
 
 }

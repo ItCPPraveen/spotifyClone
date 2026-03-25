@@ -43,5 +43,17 @@ export class QueueEffects {
         )
     );
 
+    playSong$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(QueueActions.playSong),
+            switchMap(({ songId }) =>
+                this.queueService.playSong(songId).pipe(
+                    map((queue) => QueueActions.addToQueueSuccess({ queue })),
+                    catchError((error) => of(QueueActions.getQueueFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
     constructor(private actions$: Actions, private queueService: QueueService) { }
 }

@@ -5,15 +5,19 @@ import { PlaylistsService, CreatePlaylistDto, ImportPlaylistDto } from './playli
 export class PlaylistsController {
     constructor(private playlistsService: PlaylistsService) { }
 
+    private getUserId(req: any): string {
+        return req.user?.id || req.headers['x-device-id'] || 'anonymous_user';
+    }
+
     @Post()
     async createPlaylist(@Request() req: any, @Body() dto: CreatePlaylistDto) {
-        const userId = req.user?.id || 'anonymous_user';
+        const userId = this.getUserId(req);
         return this.playlistsService.createPlaylist(userId, dto);
     }
 
     @Get()
     async getUserPlaylists(@Request() req: any) {
-        const userId = req.user?.id || 'anonymous_user';
+        const userId = this.getUserId(req);
         return this.playlistsService.getUserPlaylists(userId);
     }
 
@@ -24,7 +28,7 @@ export class PlaylistsController {
 
     @Post('import')
     async importPlaylist(@Request() req: any, @Body() dto: ImportPlaylistDto) {
-        const userId = req.user?.id || 'anonymous_user';
+        const userId = this.getUserId(req);
         return this.playlistsService.importPlaylist(userId, dto);
     }
 

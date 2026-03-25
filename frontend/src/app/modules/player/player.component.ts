@@ -13,162 +13,74 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     <!-- ══════════════════════════════════════════════════════════
          FIXED PLAYER BAR
     ══════════════════════════════════════════════════════════ -->
-    <div style="
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-      background: rgba(13,13,13,0.97);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border);
-    ">
-      <!-- ── Progress track (clickable) ──────────────────────── -->
-      <div
-        class="progress-track"
-        style="border-radius:0;"
-        (click)="seekTo($event)"
-      >
-        <div class="progress-fill" [style.width.%]="progressPercent"></div>
-      </div>
-
+    <div class="fixed bottom-0 left-0 right-0 z-[200] bg-[#0d0d0d]/95 backdrop-blur-xl border-t border-gray-800 pb-[env(safe-area-inset-bottom)]">
       <!-- ── Main player row ─────────────────────────────────── -->
-      <div style="
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        padding: 12px 24px;
-        gap: 16px;
-      ">
-
+      <div class="flex flex-col md:grid md:grid-cols-3 items-center px-4 py-2 md:py-3 gap-2 md:gap-4 max-w-screen-2xl mx-auto">
+        
         <!-- LEFT: Song info -->
-        <div style="display:flex; align-items:center; gap:14px; min-width:0;">
-          <!-- Album art / placeholder -->
-          <div style="
-            width: 48px; height: 48px; border-radius: 8px; flex-shrink:0;
-            background: var(--surface-2);
-            overflow: hidden;
-            border: 1px solid var(--border);
-          ">
-            <img
-              *ngIf="currentSong?.cover_url"
-              [src]="currentSong.cover_url"
-              style="width:100%; height:100%; object-fit:cover;"
-              alt="cover"
-            />
-            <div *ngIf="!currentSong?.cover_url" style="
-              width:100%; height:100%;
-              display:flex; align-items:center; justify-content:center;
-              font-size:22px;
-            ">🎵</div>
+        <div class="flex items-center justify-between md:justify-start w-full min-w-0 col-span-1">
+          <div class="flex items-center gap-3 min-w-0">
+            <!-- Album art / placeholder -->
+            <div class="w-12 h-12 rounded bg-gray-800 shrink-0 overflow-hidden border border-gray-700">
+              <img *ngIf="currentSong?.cover_url" [src]="currentSong.cover_url" class="w-full h-full object-cover" alt="cover"/>
+              <div *ngIf="!currentSong?.cover_url" class="w-full h-full flex items-center justify-center text-xl">🎵</div>
+            </div>
+            <div class="min-w-0 pr-2">
+              <p class="text-sm font-semibold text-white truncate">{{ currentSong?.title || 'Nothing playing' }}</p>
+              <p class="text-xs text-gray-400 truncate">{{ currentSong?.artist || '—' }}</p>
+            </div>
           </div>
-          <div style="min-width:0;">
-            <p style="font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text);">
-              {{ currentSong?.title || 'Nothing playing' }}
-            </p>
-            <p style="font-size:12px; color:var(--text-muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-              {{ currentSong?.artist || '—' }}
-            </p>
+
+          <!-- Mobile Only Controls (Visible only < md) -->
+          <div class="flex md:hidden items-center gap-2 sm:gap-3 shrink-0">
+            <button (click)="previous()" class="p-1 sm:p-2 text-gray-400 hover:text-white">⏮</button>
+            <button (click)="togglePlay()" class="p-1 sm:p-2 text-white text-xl">{{ isPlaying ? '⏸' : '▶' }}</button>
+            <button (click)="next()" class="p-1 sm:p-2 text-gray-400 hover:text-white">⏭</button>
+            <button (click)="toggleQueue()" class="p-1 sm:p-2 text-gray-400 hover:text-white ml-1 sm:ml-2" [class.text-green-500]="showQueue">🎶</button>
           </div>
-          <!-- Source badge -->
-          <span *ngIf="currentSong?.api_source" style="
-            font-size:10px; font-weight:600; padding:2px 7px;
-            border-radius:4px; flex-shrink:0;
-            background: {{ currentSong.api_source === 'youtube' ? 'rgba(255,0,0,0.2)' : 'rgba(30,215,96,0.15)' }};
-            color: {{ currentSong.api_source === 'youtube' ? '#fc5c5c' : '#1ed760' }};
-            border: 1px solid {{ currentSong.api_source === 'youtube' ? 'rgba(255,0,0,0.3)' : 'rgba(30,215,96,0.3)' }};
-          ">{{ currentSong.api_source === 'youtube' ? 'YT' : 'SP' }}</span>
         </div>
 
-        <!-- CENTER: Controls -->
-        <div style="display:flex; align-items:center; gap:8px;">
-          <!-- Sleep timer display -->
-          <span *ngIf="sleepTimerExpiry" style="
-            font-size:11px; color:var(--accent); margin-right:4px;
-            display:flex; align-items:center; gap:4px;
-          ">
+        <!-- CENTER: Playback Controls (Visible only >= md) -->
+        <div class="hidden md:flex w-full md:w-auto flex-col items-center justify-center col-span-1">
+          <div class="flex items-center gap-6">
+            <button (click)="previous()" title="Previous" class="text-gray-400 hover:text-white transition-colors text-lg">⏮</button>
+            
+            <button (click)="togglePlay()" title="Play/Pause" class="w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 transition-transform text-xl">
+              {{ isPlaying ? '⏸' : '▶' }}
+            </button>
+            
+            <button (click)="next()" title="Next" class="text-gray-400 hover:text-white transition-colors text-lg">⏭</button>
+          </div>
+          
+          <div class="flex items-center gap-2 mt-1 w-full max-w-md text-xs text-gray-400 tabular-nums">
+            <span>{{ currentTimeStr }}</span>
+            <div class="flex-1 relative flex items-center group">
+              <input type="range" 
+                     class="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-green-500 hover:h-1.5 transition-all outline-none"
+                     [min]="0" 
+                     [max]="100" 
+                     [value]="progressPercent" 
+                     (input)="onSeekScrub($event)">
+            </div>
+            <span>{{ durationStr }}</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: Extra Controls (Visible only >= md) -->
+        <div class="hidden md:flex w-full md:w-auto items-center justify-end gap-4 col-span-1">
+          <span *ngIf="sleepTimerExpiry" class="text-xs text-green-500 flex items-center gap-1">
             <span>⏱</span>{{ getRemainingTime() }}
           </span>
 
-          <!-- Previous -->
-          <button (click)="previous()" title="Previous"
-            style="
-              width:36px; height:36px; border-radius:50%; border:none;
-              background: var(--surface-2); color: var(--text-muted);
-              cursor:pointer; font-size:15px;
-              display:flex; align-items:center; justify-content:center;
-              transition: all 0.15s;
-            "
-            onmouseover="this.style.background='var(--surface-3)'; this.style.color='var(--text)'"
-            onmouseout="this.style.background='var(--surface-2)'; this.style.color='var(--text-muted)'"
-          >⏮</button>
-
-          <!-- Play / Pause (big) -->
-          <button (click)="togglePlay()" title="Play/Pause"
-            style="
-              width:48px; height:48px; border-radius:50%; border:none;
-              background: var(--accent);
-              color: #fff; cursor:pointer; font-size:20px;
-              display:flex; align-items:center; justify-content:center;
-              box-shadow: 0 0 16px var(--accent-glow);
-              transition: all 0.15s;
-            "
-            onmouseover="this.style.transform='scale(1.08)'; this.style.background='var(--accent-dark)'"
-            onmouseout="this.style.transform='scale(1)'; this.style.background='var(--accent)'"
-          >{{ isPlaying ? '⏸' : '▶' }}</button>
-
-          <!-- Next -->
-          <button (click)="next()" title="Next"
-            style="
-              width:36px; height:36px; border-radius:50%; border:none;
-              background: var(--surface-2); color: var(--text-muted);
-              cursor:pointer; font-size:15px;
-              display:flex; align-items:center; justify-content:center;
-              transition: all 0.15s;
-            "
-            onmouseover="this.style.background='var(--surface-3)'; this.style.color='var(--text)'"
-            onmouseout="this.style.background='var(--surface-2)'; this.style.color='var(--text-muted)'"
-          >⏭</button>
-
-          <!-- Time display -->
-          <span style="font-size:11px; color:var(--text-dim); margin-left:8px; font-variant-numeric:tabular-nums;">
-            {{ currentTimeStr }} / {{ durationStr }}
-          </span>
-        </div>
-
-        <!-- RIGHT: Extra controls -->
-        <div style="display:flex; align-items:center; justify-content:flex-end; gap:8px;">
-          <!-- Sleep timer buttons -->
-          <div style="display:flex; gap:4px;">
-            <button *ngFor="let opt of timerOptions"
-              (click)="setSleepTimer(opt)"
-              title="Sleep timer: {{opt}} min"
-              style="
-                padding: 4px 9px; border-radius: 6px; border: 1px solid var(--border);
-                background: transparent; color: var(--text-muted);
-                font-size: 11px; font-weight:500; cursor:pointer;
-                transition: all 0.15s;
-              "
-              onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--accent)'"
-              onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'"
-            >{{opt}}m</button>
+          <div class="flex gap-1.5">
+            <button *ngFor="let opt of timerOptions" (click)="setSleepTimer(opt)" title="Sleep timer: {{opt}}m" class="px-2 py-0.5 text-[10px] font-medium rounded border border-gray-600 text-gray-300 hover:border-white hover:text-white transition-colors">
+              {{opt}}m
+            </button>
           </div>
 
-          <!-- Queue toggle button -->
-          <button
-            (click)="toggleQueue()"
-            title="Show queue"
-            style="
-              padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
-              background: {{ showQueue ? 'var(--accent)' : 'transparent' }};
-              color: {{ showQueue ? '#fff' : 'var(--text-muted)' }};
-              font-size: 13px; font-weight:600; cursor:pointer;
-              transition: all 0.15s; display:flex; align-items:center; gap:6px;
-              white-space:nowrap;
-            "
-            [style.background]="showQueue ? 'var(--accent)' : 'transparent'"
-            [style.color]="showQueue ? '#fff' : 'var(--text-muted)'"
-          >
-            🎶 Queue <span style="
-              background: rgba(255,255,255,0.15); border-radius:10px;
-              padding: 1px 6px; font-size:11px;
-            ">{{ queueLength }}</span>
+          <button (click)="toggleQueue()" title="Queue" class="p-2 text-gray-400 hover:text-white transition-colors relative" [class.text-green-500]="showQueue">
+            <span class="text-lg">🎶</span>
+            <span class="absolute -top-1 -right-1 bg-green-500 text-black text-[9px] font-bold px-1 rounded-full">{{ queueLength }}</span>
           </button>
         </div>
       </div>
@@ -177,131 +89,77 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     <!-- ══════════════════════════════════════════════════════════
          QUEUE PANEL (slide-up drawer)
     ══════════════════════════════════════════════════════════ -->
-    <div *ngIf="showQueue" style="
-      position: fixed; bottom: 88px; right: 20px; z-index: 199;
-      width: 360px; max-height: 480px;
-      background: var(--surface);
-      border: 1px solid var(--border); border-radius: 16px;
-      overflow: hidden; display:flex; flex-direction:column;
-      box-shadow: 0 -4px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
-      animation: slideUp 0.2s ease-out;
-    ">
+    <div *ngIf="showQueue" 
+      class="fixed z-[199] flex flex-col overflow-hidden shadow-2xl bg-[#121212] border border-gray-800 animate-slideUp
+             bottom-[68px] md:bottom-[88px] right-0 md:right-4 w-full md:w-[360px] h-[60vh] md:max-h-[480px] rounded-t-xl md:rounded-xl">
       <!-- Panel header -->
-      <div style="
-        display:flex; justify-content:space-between; align-items:center;
-        padding: 16px 20px 12px;
-        border-bottom: 1px solid var(--border);
-      ">
-        <span style="font-size:14px; font-weight:700;">Up Next</span>
-        <div style="display:flex; gap:8px; align-items:center;">
-          <span style="font-size:12px; color:var(--text-muted);">{{ queueLength }} songs</span>
-          <button
-            (click)="clearQueue()"
-            style="
-              font-size:11px; color:var(--accent); background:none; border:none;
-              cursor:pointer; padding:2px 6px; border-radius:4px;
-            "
-            *ngIf="queueLength > 0"
-          >Clear all</button>
-          <button (click)="toggleQueue()"
-            style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px; line-height:1;"
-          >×</button>
+      <div class="flex justify-between items-center px-4 py-3 border-b border-gray-800 bg-[#181818]">
+        <span class="font-bold text-white text-sm">Up Next</span>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-gray-400">{{ queueLength }} songs</span>
+          <button (click)="clearQueue()" class="text-[11px] text-green-500 hover:text-green-400 transition-colors" *ngIf="queueLength > 0">Clear all</button>
+          <button (click)="toggleQueue()" class="text-gray-400 hover:text-white text-lg leading-none ml-1">&times;</button>
         </div>
       </div>
 
       <!-- Queue list with drag-to-reorder -->
-      <div style="overflow-y:auto; flex:1;" id="queueList">
+      <div class="overflow-y-auto flex-1 bg-[#121212]" id="queueList">
         <div
           *ngFor="let song of queueSongs; let i = index"
-          class="queue-item animate-fadeIn"
+          class="flex items-center gap-3 px-4 py-2 cursor-grab transition-colors border-b border-white/5 relative group"
           [draggable]="true"
           (dragstart)="onDragStart(i, $event)"
           (dragover)="onDragOver(i, $event)"
           (drop)="onDrop(i)"
           (dragend)="onDragEnd()"
-          style="
-            display:flex; align-items:center; gap:12px;
-            padding: 10px 16px; cursor:grab;
-            transition: background 0.15s;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            position: relative;
-          "
-          [style.background]="i === currentIndex ? 'rgba(229,62,62,0.1)' : (dragOverIndex === i ? 'var(--surface-2)' : 'transparent')"
-          onmouseover="if(!this.style.background.includes('229,62,62')) this.style.background='var(--surface-2)'"
-          onmouseout="if(!this.style.background.includes('229,62,62')) this.style.background=''"
+          [ngClass]="i === currentIndex ? 'bg-green-900/10' : (dragOverIndex === i ? 'bg-gray-800' : 'hover:bg-gray-800')"
         >
           <!-- Drag handle -->
-          <span style="color:var(--text-dim); font-size:14px; flex-shrink:0; cursor:grab;">⠿</span>
+          <span class="text-gray-600 text-sm shrink-0 cursor-grab group-hover:text-gray-400">⠿</span>
 
           <!-- Position / playing indicator -->
-          <span style="
-            width:20px; text-align:center; font-size:12px; flex-shrink:0;
-            color: {{ i === currentIndex ? 'var(--accent)' : 'var(--text-dim)' }};
-          " [style.color]="i === currentIndex ? 'var(--accent)' : 'var(--text-dim)'">
+          <span class="w-5 text-center text-xs shrink-0" [ngClass]="i === currentIndex ? 'text-green-500 font-bold' : 'text-gray-500'">
             {{ i === currentIndex ? '♪' : (i + 1) }}
           </span>
 
           <!-- Cover -->
-          <div style="width:38px; height:38px; border-radius:6px; flex-shrink:0; overflow:hidden; background:var(--surface-3);">
-            <img *ngIf="song.cover_url" [src]="song.cover_url" style="width:100%; height:100%; object-fit:cover;" alt="">
-            <div *ngIf="!song.cover_url" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:18px;">🎵</div>
+          <div class="w-10 h-10 rounded shrink-0 overflow-hidden bg-gray-800">
+            <img *ngIf="song.cover_url" [src]="song.cover_url" class="w-full h-full object-cover" alt="">
+            <div *ngIf="!song.cover_url" class="w-full h-full flex items-center justify-center text-sm">🎵</div>
           </div>
 
           <!-- Title + Artist -->
-          <div style="flex:1; min-width:0;">
-            <p style="
-              font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-              color: {{ i === currentIndex ? 'var(--accent)' : 'var(--text)' }};
-            " [style.color]="i === currentIndex ? 'var(--accent)' : 'var(--text)'">{{ song.title }}</p>
-            <p style="font-size:11px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ song.artist }}</p>
+          <div class="flex-1 min-w-0">
+            <p class="text-[13px] font-medium truncate" [ngClass]="i === currentIndex ? 'text-green-500' : 'text-white'">{{ song.title }}</p>
+            <p class="text-[11px] text-gray-400 truncate">{{ song.artist }}</p>
           </div>
 
           <!-- Duration -->
-          <span style="font-size:11px; color:var(--text-dim); flex-shrink:0;">{{ formatDuration(song.duration_ms) }}</span>
+          <span class="text-[11px] text-gray-500 shrink-0 hidden sm:block">{{ formatDuration(song.duration_ms) }}</span>
 
           <!-- Play / Remove buttons -->
-          <div style="display:flex; gap:4px; flex-shrink:0;">
-            <button (click)="playAt(i)" title="Play this song"
-              style="
-                width:28px; height:28px; border-radius:50%; border:1px solid var(--border);
-                background:none; color:var(--text-muted); cursor:pointer; font-size:12px;
-                display:flex; align-items:center; justify-content:center; transition: all 0.15s;
-              "
-              onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--accent)'"
-              onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'"
-            >▶</button>
-            <button (click)="removeFromQueue(song._id)" title="Remove"
-              style="
-                width:28px; height:28px; border-radius:50%; border:1px solid var(--border);
-                background:none; color:var(--text-muted); cursor:pointer; font-size:14px;
-                display:flex; align-items:center; justify-content:center; transition: all 0.15s;
-              "
-              onmouseover="this.style.borderColor='rgba(229,62,62,0.6)'; this.style.color='var(--accent)'"
-              onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'"
-            >✕</button>
+          <div class="flex gap-1 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+            <button (click)="playAt(i)" title="Play this song" class="w-7 h-7 flex items-center justify-center rounded-full bg-gray-700 text-white hover:bg-green-500 text-xs transition-colors">
+              ▶
+            </button>
+            <button (click)="removeFromQueue(song._id)" title="Remove" class="w-7 h-7 flex items-center justify-center rounded-full bg-gray-700 text-gray-300 hover:bg-red-500 hover:text-white transition-colors">
+              ✕
+            </button>
           </div>
         </div>
 
         <!-- Empty state -->
-        <div *ngIf="queueLength === 0" style="
-          padding: 40px 20px; text-align:center; color: var(--text-dim);
-        ">
-          <p style="font-size:32px; margin-bottom:12px;">🎵</p>
-          <p style="font-size:14px;">Queue is empty</p>
-          <p style="font-size:12px; margin-top:6px;">Search for songs and add them to your queue</p>
+        <div *ngIf="queueLength === 0" class="py-10 px-5 text-center text-gray-500">
+          <p class="text-3xl mb-3">🎵</p>
+          <p class="text-sm font-medium text-gray-400">Queue is empty</p>
+          <p class="text-xs mt-1.5">Search for songs and add them to your queue</p>
         </div>
       </div>
     </div>
 
-    <!-- ── Hidden YouTube iframe ─────────────────────────────────── -->
-    <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px;" *ngIf="isYouTubeSong()">
-      <iframe #youtubePlayer
-        width="1" height="1"
-        [src]="getYouTubeEmbedUrl()"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen>
-      </iframe>
+    <!-- ── Hidden YouTube container ─────────────────────────────────── -->
+    <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px;">
+      <div id="youtube-player-container"></div>
     </div>
 
     <!-- ── Hidden audio element ──────────────────────────────────── -->
@@ -309,6 +167,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
       (timeupdate)="onTimeUpdate($event)"
       (ended)="next()"
       (durationchange)="onDurationChange($event)"
+      (play)="onAudioPlay()"
+      (pause)="onAudioPause()"
       style="display:none">
     </audio>
   `,
@@ -338,9 +198,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
   dragFromIndex = -1;
   dragOverIndex = -1;
 
-  // ── YouTube URL
-  private currentYouTubeId = '';
-  private youtubeUrl!: SafeResourceUrl;
+  // ── YouTube API
+  private ytPlayer: any = null;
+  private isYtApiReady = false;
 
   private destroy$ = new Subject<void>();
 
@@ -353,6 +213,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.store.dispatch(QueueActions.getQueue());
+
+    // Initialize YouTube IFrame API
+    this.initYouTubeAPI();
 
     // Track queue songs
     this.store.select(queueSelectors.selectQueueSongs)
@@ -382,6 +245,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
         } else if (!song) {
           this.pauseAudio();
         }
+        
+        // If playSong was blocked by autoplay policy, the listeners will correct this,
+        // but we assume it's true until notified otherwise.
         this.cdRef.markForCheck();
       });
 
@@ -393,19 +259,54 @@ export class PlayerComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
       });
 
-    // 1-second ticker: update progress for YouTube (which has no timeupdate event) + check sleep timer
+    // Ticker for YouTube progress & sleep timer
     this.ngZone.runOutsideAngular(() => {
       interval(500).pipe(takeUntil(this.destroy$)).subscribe(() => {
-        // Sleep timer auto-stop
+        // Sleep timer check
         if (this.sleepTimerExpiry && new Date() >= this.sleepTimerExpiry) {
           this.ngZone.run(() => {
             this.sleepTimerExpiry = null;
             this.pauseAudio();
           });
         }
-        this.ngZone.run(() => { this.cdRef.markForCheck(); });
+        
+        // YouTube progress check
+        if (this.isPlaying && this.isYouTubeSong() && this.ytPlayer && this.ytPlayer.getCurrentTime) {
+          this.ngZone.run(() => {
+            const current = this.ytPlayer.getCurrentTime();
+            const duration = this.ytPlayer.getDuration();
+            this.currentTimeSec = current || 0;
+            this.durationSec = duration || 0;
+            if (this.durationSec > 0) {
+              this.progressPercent = (this.currentTimeSec / this.durationSec) * 100;
+            }
+            this.cdRef.markForCheck();
+          });
+        }
       });
     });
+  }
+
+  // ── YouTube Initializer ────────────────────────────────────────
+
+  private initYouTubeAPI() {
+    if ((window as any).YT) {
+      this.isYtApiReady = true;
+      return;
+    }
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    (window as any).onYouTubeIframeAPIReady = () => {
+      this.ngZone.run(() => {
+        this.isYtApiReady = true;
+        // If we already tried to play a song before API loaded, play it now
+        if (this.isYouTubeSong() && this.currentSong?.youtube_id) {
+          this.playYouTube(this.currentSong.youtube_id);
+        }
+      });
+    };
   }
 
   // ── Playback ───────────────────────────────────────────────────
@@ -414,11 +315,19 @@ export class PlayerComponent implements OnInit, OnDestroy {
     if (this.isPlaying) {
       this.pauseAudio();
     } else {
-      this.isPlaying = true;
-      if (this.currentSong && !this.isYouTubeSong() && this.audioRef) {
-        this.audioRef.nativeElement.play().catch(e => console.error('Play failed', e));
+      if (this.isYouTubeSong() && this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
+        this.ytPlayer.playVideo();
+        this.isPlaying = true;
+      } else if (this.currentSong && !this.isYouTubeSong() && this.audioRef) {
+        this.audioRef.nativeElement.play().then(() => {
+           this.isPlaying = true;
+           this.cdRef.markForCheck();
+        }).catch(e => {
+           console.warn('Autoplay prevented or play failed', e);
+           this.isPlaying = false;
+           this.cdRef.markForCheck();
+        });
       }
-      // For YT: isYouTubeSong() = true triggers iframe re-mount with autoplay=1
     }
   }
 
@@ -428,14 +337,17 @@ export class PlayerComponent implements OnInit, OnDestroy {
     this.currentTimeSec = 0;
     this.durationSec = 0;
 
+    // Pause whichever is currently playing
+    this.audioRef?.nativeElement.pause();
+    if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === 'function') {
+      this.ytPlayer.pauseVideo();
+    }
+
     if (song.api_source === 'youtube' && song.youtube_id) {
-      this.currentYouTubeId = song.youtube_id;
-      this.youtubeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-        `https://www.youtube.com/embed/${song.youtube_id}?autoplay=1&enablejsapi=1`
-      );
-      if (this.audioRef) this.audioRef.nativeElement.pause();
+      if (this.isYtApiReady) {
+        this.playYouTube(song.youtube_id);
+      }
     } else if (song.preview_url) {
-      this.currentYouTubeId = '';
       const audio = this.audioRef?.nativeElement;
       if (audio) {
         if (audio.src !== song.preview_url) audio.src = song.preview_url;
@@ -444,17 +356,47 @@ export class PlayerComponent implements OnInit, OnDestroy {
     }
   }
 
+  private playYouTube(videoId: string) {
+    if (this.ytPlayer && typeof this.ytPlayer.loadVideoById === 'function') {
+      this.ytPlayer.loadVideoById(videoId);
+    } else {
+      this.ytPlayer = new (window as any).YT.Player('youtube-player-container', {
+        height: '1',
+        width: '1',
+        videoId: videoId,
+        playerVars: { 'autoplay': 1, 'controls': 0, 'enablejsapi': 1 },
+        events: {
+          'onReady': (event: any) => {
+            event.target.playVideo();
+          },
+          'onStateChange': (event: any) => {
+            this.ngZone.run(() => {
+              if (event.data === (window as any).YT.PlayerState.ENDED) {
+                this.next();
+              } else if (event.data === (window as any).YT.PlayerState.PLAYING) {
+                this.isPlaying = true;
+                this.cdRef.markForCheck();
+              } else if (event.data === (window as any).YT.PlayerState.PAUSED) {
+                this.isPlaying = false;
+                this.cdRef.markForCheck();
+              }
+            });
+          }
+        }
+      });
+    }
+  }
+
   private pauseAudio() {
     this.isPlaying = false;
     this.audioRef?.nativeElement.pause();
+    if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === 'function') {
+      this.ytPlayer.pauseVideo();
+    }
   }
 
   isYouTubeSong(): boolean {
     return !!this.currentSong && this.currentSong.api_source === 'youtube' && !!this.currentSong.youtube_id;
-  }
-
-  getYouTubeEmbedUrl(): SafeResourceUrl {
-    return this.youtubeUrl || this.sanitizer.bypassSecurityTrustResourceUrl('about:blank');
   }
 
   // ── Progress ───────────────────────────────────────────────────
@@ -471,14 +413,34 @@ export class PlayerComponent implements OnInit, OnDestroy {
     this.durationSec = (e.target as HTMLAudioElement).duration || 0;
   }
 
-  seekTo(e: MouseEvent) {
-    if (!this.audioRef?.nativeElement.duration) return;
-    const track = e.currentTarget as HTMLElement;
-    const ratio = e.offsetX / track.offsetWidth;
-    const audio = this.audioRef.nativeElement;
-    audio.currentTime = ratio * audio.duration;
-    this.currentTimeSec = audio.currentTime;
-    this.progressPercent = ratio * 100;
+  onAudioPlay() {
+    this.isPlaying = true;
+    this.cdRef.markForCheck();
+  }
+
+  onAudioPause() {
+    this.isPlaying = false;
+    this.cdRef.markForCheck();
+  }
+
+  onSeekScrub(event: any) {
+    const val = parseFloat(event.target.value);
+    
+    if (this.isYouTubeSong() && this.ytPlayer && typeof this.ytPlayer.seekTo === 'function') {
+      const dur = this.ytPlayer.getDuration() || 0;
+      if (dur > 0) {
+        const targetTime = (val / 100) * dur;
+        this.ytPlayer.seekTo(targetTime, true);
+        this.progressPercent = val;
+        this.currentTimeSec = targetTime;
+      }
+    } else if (this.audioRef?.nativeElement?.duration) {
+      const audio = this.audioRef.nativeElement;
+      const targetTime = (val / 100) * audio.duration;
+      audio.currentTime = targetTime;
+      this.currentTimeSec = targetTime;
+      this.progressPercent = val;
+    }
   }
 
   private secToStr(s: number): string {
