@@ -29,10 +29,19 @@ export class SongsService {
     }
 
     async getSongById(id: string): Promise<Song> {
-        const song = await this.songModel.findById(id);
+        let song: any = await this.songModel.findById(id);
         if (!song) {
             throw new HttpException('Song not found', HttpStatus.NOT_FOUND);
         }
+
+        if (!song.youtube_id && song.api_source === 'spotify') {
+            try {
+                song = await this.searchMapService.resolveYouTubeId(id);
+            } catch (e) {
+                this.logger.warn(`Failed to dynamically resolve youtube ID for ${id}`);
+            }
+        }
+        
         return song;
     }
 

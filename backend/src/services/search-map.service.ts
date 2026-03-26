@@ -186,4 +186,27 @@ export class SearchMapService {
         }
         return songs;
     }
+
+    /**
+     * Lazily resolve YouTube ID for a Spotify-imported track
+     */
+    async resolveYouTubeId(songId: string): Promise<SongDocument> {
+        let song = await this.songModel.findById(songId);
+        if (!song) throw new Error('Song not found');
+
+        if (!song.youtube_id && song.api_source === 'spotify') {
+            try {
+                const query = `${song.title} ${song.artist}`;
+                const ytTracks = await this.youTubeService.searchTracks(query, 1);
+                if (ytTracks && ytTracks.length > 0) {
+                    song.youtube_id = ytTracks[0].id;
+                    // Keep api_source as spotify, but add youtube_id so frontend knows it can use YouTube player
+                    await song.save();
+                }
+            } catch (err) {
+                this.logger.error(`Failed to resolve YouTube ID for song ${songId}`, err);
+            }
+        }
+        return song;
+    }
 }
