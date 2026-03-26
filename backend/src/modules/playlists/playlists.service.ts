@@ -38,9 +38,10 @@ export class PlaylistsService {
         return playlist;
     }
 
-    async getUserPlaylists(userId: string): Promise<Playlist[]> {
+    async getUserPlaylists(_userId: string): Promise<Playlist[]> {
+        // Return all playlists so they are visible to all users
         return this.playlistModel
-            .find({ owner: userId })
+            .find({})
             .populate('songs')
             .sort({ createdAt: -1 })
             .exec();
