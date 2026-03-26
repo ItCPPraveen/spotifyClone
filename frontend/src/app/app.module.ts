@@ -17,6 +17,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { PlayerComponent } from './modules/player/player.component';
 import { SongCardComponent } from './modules/player/song-card.component';
 import { PlaylistImportComponent } from './modules/import/playlist-import.component';
+import { PlaylistDetailComponent } from './modules/import/playlist-detail.component';
 import { SearchComponent } from './modules/home/search.component';
 
 // Store imports
@@ -29,6 +30,7 @@ const routes: Routes = [
     { path: '', component: SearchComponent },
     { path: 'search', component: SearchComponent },
     { path: 'import', component: PlaylistImportComponent },
+    { path: 'playlists/:id', component: PlaylistDetailComponent },
 ];
 
 @NgModule({
@@ -37,6 +39,7 @@ const routes: Routes = [
         PlayerComponent,
         SongCardComponent,
         PlaylistImportComponent,
+        PlaylistDetailComponent,
         SearchComponent,
     ],
     imports: [

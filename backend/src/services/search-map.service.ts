@@ -168,10 +168,14 @@ export class SearchMapService {
                     ? this.mapSpotifyTrackToSong(track as SpotifyTrack)
                     : this.mapYouTubeTrackToSong(track as YouTubeTrack);
 
-            // Check if song already exists
-            const existing = await this.songModel.findOne({
-                $or: [{ spotify_id: mapped.spotify_id }, { youtube_id: mapped.youtube_id }],
-            });
+            const orConditions = [];
+            if (mapped.spotify_id) orConditions.push({ spotify_id: mapped.spotify_id });
+            if (mapped.youtube_id) orConditions.push({ youtube_id: mapped.youtube_id });
+
+            let existing = null;
+            if (orConditions.length > 0) {
+                existing = await this.songModel.findOne({ $or: orConditions });
+            }
 
             if (!existing) {
                 const saved = await this.songModel.create(mapped);

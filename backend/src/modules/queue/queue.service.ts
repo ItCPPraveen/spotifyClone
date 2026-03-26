@@ -76,9 +76,10 @@ export class QueueService {
     async setCurrentSong(userId: string, songId: string): Promise<QueueDocument> {
         const queue = await this.getOrCreateQueue(userId);
 
-        const index = queue.songs.findIndex((id) => id.toString() === songId);
+        let index = queue.songs.findIndex((id) => id.toString() === songId);
         if (index === -1) {
-            throw new HttpException('Song not in queue', HttpStatus.BAD_REQUEST);
+            queue.songs.push(new Types.ObjectId(songId));
+            index = queue.songs.length - 1;
         }
 
         queue.current_index = index;

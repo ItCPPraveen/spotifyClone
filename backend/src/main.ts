@@ -7,13 +7,18 @@ async function bootstrap() {
 
     const configService = app.get(ConfigService);
     const port = configService.get<number>('PORT') || 3001;
-    const corsOrigin = configService.get<string>('CORS_ORIGIN') || 'http://localhost:4200';
+    const corsOriginConfig = configService.get<string>('CORS_ORIGIN');
+    
+    // Support multiple origins natively or via comma-separated ENV string
+    const corsOrigins = corsOriginConfig 
+        ? corsOriginConfig.split(',').map(o => o.trim()) 
+        : ['http://localhost:4200', 'https://spotifyhehe-frontend.onrender.com'];
 
     app.enableCors({
-        origin: corsOrigin,
+        origin: corsOrigins,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-device-id'],
     });
 
     app.setGlobalPrefix('api');

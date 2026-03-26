@@ -4,6 +4,8 @@ export const getQueue = createAction('[Queue] Get Queue');
 export const getQueueSuccess = createAction('[Queue] Get Queue Success', props<{ queue: any }>());
 export const getQueueFailure = createAction('[Queue] Get Queue Failure', props<{ error: string }>());
 
+export const playSong = createAction('[Queue] Play Song', props<{ songId: string }>());
+
 export const addToQueue = createAction('[Queue] Add To Queue', props<{ songId: string }>());
 export const addToQueueSuccess = createAction('[Queue] Add To Queue Success', props<{ queue: any }>());
 export const removeFromQueue = createAction('[Queue] Remove From Queue', props<{ songId: string }>());

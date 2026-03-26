@@ -85,7 +85,6 @@ interface ITunesResult {
         <app-song-card
           *ngFor="let song of songs$ | async"
           [song]="song"
-          (addedToQueue)="onSongAdded($event)"
         ></app-song-card>
       </div>
 
@@ -179,10 +178,6 @@ export class SearchComponent implements OnInit, OnDestroy {
       // Restore recent songs if search is cleared
       this.store.dispatch(SongsActions.getRecentSongs());
     }
-  }
-
-  onSongAdded(songId: string) {
-    this.store.dispatch(QueueActions.addToQueue({ songId }));
   }
 
   ngOnDestroy() {

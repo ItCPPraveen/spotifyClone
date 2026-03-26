@@ -1,6 +1,6 @@
-import * as PlaylistsActions from './playlists.actions';
-import { playlistsReducer } from './playlists.reducer';
-import { PlaylistsEffects } from './playlists.effects';
-import * as playlistsSelectors from './playlists.selectors';
+import * as PlaylistActions from './playlist.actions';
+import * as playlistSelectors from './playlist.selectors';
+export { playlistReducer as playlistsReducer } from './playlist.reducer';
+export { PlaylistEffects as PlaylistsEffects } from './playlist.effects';
 
-export { PlaylistsActions, playlistsReducer, PlaylistsEffects, playlistsSelectors };
+export { PlaylistActions, playlistSelectors };
