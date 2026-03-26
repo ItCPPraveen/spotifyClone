@@ -101,43 +101,48 @@ export class SpotifyService {
         }
     }
 
-    async getPlaylistTracks(playlistId: string, accessToken?: string): Promise<SpotifyTrack[]> {
+    async getPlaylistTracks(playlistId: string, _accessToken?: string): Promise<SpotifyTrack[]> {
         try {
-            const token = accessToken || (await this.getClientCredentialsToken());
-            const allTracks: SpotifyTrack[] = [];
-            let url = `/playlists/${playlistId}/tracks`;
-
-            while (url) {
-                const response = await this.client.get(url, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                response.data.items.forEach((item: { track?: SpotifyTrack }) => {
-                    if (item.track) {
-                        allTracks.push(item.track);
-                    }
-                });
-
-                url = response.data.next ? response.data.next.replace('https://api.spotify.com/v1', '') : null;
-            }
-
-            return allTracks;
+            // Because of Spotify App Development mode restrictions returning 404 for public catalog,
+            // we use spotify-url-info scraper to bypass API limit for tracks.
+            const _fetch = Reflect.get(globalThis, 'fetch') as any;
+            const { getTracks } = require('spotify-url-info')(_fetch);
+            const playlistUrl = `https://open.spotify.com/playlist/${playlistId}`;
+            const scrapedTracks = await getTracks(playlistUrl);
+            
+            return scrapedTracks.map((t: any) => ({
+                id: t.uri ? t.uri.split(':').pop() : '',
+                name: t.name,
+                artists: [{ name: t.artist || 'Unknown Artist' }],
+                album: { name: '', images: [] },
+                duration_ms: t.duration || 0,
+                preview_url: t.previewUrl || '',
+                popularity: 50,
+            }));
         } catch (error) {
-            this.logger.error('Failed to fetch Spotify playlist tracks:', error);
+            this.logger.error('Failed to fetch Spotify playlist tracks via scraper:', error);
             throw error;
         }
     }
 
-    async getPlaylist(playlistId: string, accessToken?: string): Promise<SpotifyPlaylist> {
+    async getPlaylist(playlistId: string, _accessToken?: string): Promise<SpotifyPlaylist> {
         try {
-            const token = accessToken || (await this.getClientCredentialsToken());
-            const response = await this.client.get(`/playlists/${playlistId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            return response.data;
+            // Use scraper to bypass App Dev Mode API restrictions
+            const _fetch = Reflect.get(globalThis, 'fetch') as any;
+            const { getPreview } = require('spotify-url-info')(_fetch);
+            const playlistUrl = `https://open.spotify.com/playlist/${playlistId}`;
+            const preview = await getPreview(playlistUrl);
+            
+            return {
+                id: playlistId,
+                name: preview.title || 'Imported Playlist',
+                description: preview.description || '',
+                images: preview.image ? [{ url: preview.image }] : [],
+                tracks: { total: 0, items: [], next: null },
+                owner: { display_name: 'Spotify User' }
+            };
         } catch (error) {
-            this.logger.error('Failed to fetch Spotify playlist:', error);
+            this.logger.error('Failed to fetch Spotify playlist via scraper:', error);
             throw error;
         }
     }

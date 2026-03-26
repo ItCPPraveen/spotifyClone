@@ -5,6 +5,7 @@ import { takeUntil, map } from 'rxjs/operators';
 import { queueSelectors, QueueActions } from '@store/queue';
 import { ElementRef, ViewChild, NgZone } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SongsService } from '@services/songs.service';
 
 @Component({
   selector: 'app-player',
@@ -209,6 +210,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private cdRef: ChangeDetectorRef,
     private ngZone: NgZone,
+    private songsService: SongsService,
   ) {}
 
   ngOnInit() {
@@ -332,6 +334,19 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   private playSong(song: any) {
+    if (song.api_source === 'spotify' && !song.youtube_id) {
+       this.songsService.getSongById(song._id).subscribe({
+         next: (resolved) => {
+           this.playResolvedSong(resolved);
+         },
+         error: () => this.playResolvedSong(song)
+       });
+       return;
+    }
+    this.playResolvedSong(song);
+  }
+
+  private playResolvedSong(song: any) {
     this.isPlaying = true;
     this.progressPercent = 0;
     this.currentTimeSec = 0;
@@ -343,7 +358,12 @@ export class PlayerComponent implements OnInit, OnDestroy {
       this.ytPlayer.pauseVideo();
     }
 
-    if (song.api_source === 'youtube' && song.youtube_id) {
+    if (song.api_source === 'spotify' && song.youtube_id) {
+      // It has been resolved to youtube!
+      if (this.isYtApiReady) {
+        this.playYouTube(song.youtube_id);
+      }
+    } else if (song.api_source === 'youtube' && song.youtube_id) {
       if (this.isYtApiReady) {
         this.playYouTube(song.youtube_id);
       }
@@ -354,6 +374,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
         audio.play().catch(e => console.error('Audio failed', e));
       }
     }
+    this.cdRef.markForCheck();
   }
 
   private playYouTube(videoId: string) {
@@ -396,7 +417,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   isYouTubeSong(): boolean {
-    return !!this.currentSong && this.currentSong.api_source === 'youtube' && !!this.currentSong.youtube_id;
+    return !!this.currentSong && !!this.currentSong.youtube_id;
   }
 
   // ── Progress ───────────────────────────────────────────────────
