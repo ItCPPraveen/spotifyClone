@@ -30,6 +30,16 @@ export class QueueController {
         return { message: 'Queue cleared' };
     }
 
+    @Post('replace')
+    async replaceQueue(@Request() req: any, @Body() body: { songIds: string[] }) {
+        return this.queueService.replaceQueue(this.getUserId(req), body.songIds);
+    }
+
+    @Post('add-multiple')
+    async addMultipleToQueue(@Request() req: any, @Body() body: { songIds: string[] }) {
+        return this.queueService.addMultipleToQueue(this.getUserId(req), body.songIds);
+    }
+
     @Post('play/:songId')
     async setCurrentSong(@Request() req: any, @Param('songId') songId: string) {
         return this.queueService.setCurrentSong(this.getUserId(req), songId);

@@ -55,5 +55,29 @@ export class QueueEffects {
         )
     );
 
+    replaceQueue$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(QueueActions.replaceQueue),
+            switchMap(({ songIds }) =>
+                this.queueService.replaceQueue(songIds).pipe(
+                    map((queue) => QueueActions.addToQueueSuccess({ queue })),
+                    catchError((error) => of(QueueActions.getQueueFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
+    addMultipleToQueue$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(QueueActions.addMultipleToQueue),
+            switchMap(({ songIds }) =>
+                this.queueService.addMultipleToQueue(songIds).pipe(
+                    map((queue) => QueueActions.addToQueueSuccess({ queue })),
+                    catchError((error) => of(QueueActions.getQueueFailure({ error: error.message })))
+                )
+            )
+        )
+    );
+
     constructor(private actions$: Actions, private queueService: QueueService) { }
 }

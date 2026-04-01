@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Request, Query } from '@nestjs/common';
 import { PlaylistsService, CreatePlaylistDto, ImportPlaylistDto } from './playlists.service';
 
 @Controller('playlists')
@@ -19,6 +19,16 @@ export class PlaylistsController {
     async getUserPlaylists(@Request() req: any) {
         const userId = this.getUserId(req);
         return this.playlistsService.getUserPlaylists(userId);
+    }
+
+    @Get('search/youtube')
+    async searchYouTubePlaylists(@Query('q') query: string) {
+        return this.playlistsService.searchYouTubePlaylists(query);
+    }
+
+    @Get('youtube/:id/items')
+    async getYouTubePlaylistItems(@Param('id') id: string) {
+        return this.playlistsService.getYouTubePlaylistItems(id);
     }
 
     @Get(':id')

@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
     providedIn: 'root'
 })
 export class QueueService {
-    private apiUrl = environment.apiUrl;
+    private apiUrl = (environment as any).apiUrl || (environment as any).apiurl;
 
     constructor(private http: HttpClient) { }
 
@@ -42,6 +42,14 @@ export class QueueService {
 
     clearQueue(): Observable<any> {
         return this.http.delete(`${this.apiUrl}/queue/clear`, { headers: this.getHeaders() });
+    }
+
+    replaceQueue(songIds: string[]): Observable<any> {
+        return this.http.post(`${this.apiUrl}/queue/replace`, { songIds }, { headers: this.getHeaders() });
+    }
+
+    addMultipleToQueue(songIds: string[]): Observable<any> {
+        return this.http.post(`${this.apiUrl}/queue/add-multiple`, { songIds }, { headers: this.getHeaders() });
     }
 
     setSleepTimer(durationMinutes: number): Observable<{ expires_at: Date }> {

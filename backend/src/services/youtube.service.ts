@@ -80,6 +80,35 @@ export class YouTubeService {
         }
     }
 
+    async searchPlaylists(query: string, limit: number = 8): Promise<any[]> {
+        if (!this.apiKey || this.apiKey === 'your_youtube_api_key') {
+            this.logger.warn('Skipping YouTube playlist search: API Key not set.');
+            return [];
+        }
+
+        try {
+            const searchRes = await this.client.get('/search', {
+                params: {
+                    part: 'snippet',
+                    q: query,
+                    type: 'playlist',
+                    maxResults: limit,
+                    key: this.apiKey,
+                },
+            });
+
+            return searchRes.data.items.map((item: any) => ({
+                id: item.id?.playlistId,
+                title: item.snippet?.title || 'Unknown',
+                channelTitle: item.snippet?.channelTitle || 'Unknown',
+                thumbnail: item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url,
+            }));
+        } catch (error) {
+            this.logger.error('YouTube playlist search failed:', error);
+            throw new HttpException('YouTube API error', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     async getPlaylist(playlistId: string): Promise<{
         id: string;
         title: string;
