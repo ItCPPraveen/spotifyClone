@@ -54,6 +54,38 @@ export class QueueService {
         return queue;
     }
 
+    async replaceQueue(userId: string, songIds: string[]): Promise<QueueDocument> {
+        const queue = await this.getOrCreateQueue(userId);
+        
+        // Remove duplicates and generate ObjectIds
+        const uniqueIds = Array.from(new Set(songIds));
+        queue.songs = uniqueIds.map(id => new Types.ObjectId(id));
+        queue.current_index = 0;
+        queue.current_playing_id = queue.songs.length > 0 ? queue.songs[0] : undefined;
+        
+        await queue.save();
+        return this.getQueue(userId);
+    }
+
+    async addMultipleToQueue(userId: string, songIds: string[]): Promise<QueueDocument> {
+        const queue = await this.getOrCreateQueue(userId);
+        
+        const newSongs = songIds.map(id => new Types.ObjectId(id));
+        // Add only ones that do not exist if that's preferred, but a generic add allows duplicates?
+        // Let's filter out ones that already exist in queue
+        const currentSongStrings = queue.songs.map(id => id.toString());
+        const filteredNew = newSongs.filter(id => !currentSongStrings.includes(id.toString()));
+        queue.songs.push(...filteredNew);
+        
+        if (queue.songs.length === filteredNew.length && filteredNew.length > 0) {
+            queue.current_index = 0;
+            queue.current_playing_id = queue.songs[0];
+        }
+        
+        await queue.save();
+        return this.getQueue(userId);
+    }
+
     async clearQueue(userId: string): Promise<void> {
         await this.queueModel.updateOne(
             { user_id: userId, is_active: true },

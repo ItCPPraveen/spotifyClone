@@ -76,4 +76,11 @@ export const queueReducer = createReducer(
         ...state,
         sleepTimer: { expiresAt },
     })),
+    on(QueueActions.setTransientQueue, (state, { songs, currentIndex }) => ({
+        ...state,
+        songs,
+        currentIndex,
+        currentPlayingId: songs[currentIndex]?._id || null,
+        loading: false,
+    }))
 );

@@ -18,6 +18,7 @@ import { PlayerComponent } from './modules/player/player.component';
 import { SongCardComponent } from './modules/player/song-card.component';
 import { PlaylistImportComponent } from './modules/import/playlist-import.component';
 import { PlaylistDetailComponent } from './modules/import/playlist-detail.component';
+import { YoutubePlaylistComponent } from './modules/import/youtube-playlist.component';
 import { SearchComponent } from './modules/home/search.component';
 
 // Store imports
@@ -31,6 +32,7 @@ const routes: Routes = [
     { path: 'search', component: SearchComponent },
     { path: 'import', component: PlaylistImportComponent },
     { path: 'playlists/:id', component: PlaylistDetailComponent },
+    { path: 'youtube-playlist/:id', component: YoutubePlaylistComponent },
 ];
 
 @NgModule({
@@ -40,6 +42,7 @@ const routes: Routes = [
         SongCardComponent,
         PlaylistImportComponent,
         PlaylistDetailComponent,
+        YoutubePlaylistComponent,
         SearchComponent,
     ],
     imports: [

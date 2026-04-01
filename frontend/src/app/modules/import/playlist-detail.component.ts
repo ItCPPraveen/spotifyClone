@@ -7,90 +7,7 @@ import { QueueActions } from '@store/queue';
 
 @Component({
   selector: 'app-playlist-detail',
-  template: `
-    <div class="px-4 py-6 md:px-8 max-w-7xl mx-auto" *ngIf="playlist$ | async as playlist">
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row items-end gap-6 mb-8 mt-4">
-        <div class="w-48 h-48 md:w-60 md:h-60 shrink-0 shadow-2xl rounded-xl overflow-hidden bg-gray-800">
-          <img *ngIf="playlist.image_url" [src]="playlist.image_url" class="w-full h-full object-cover">
-          <div *ngIf="!playlist.image_url" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600 text-6xl">
-            🎵
-          </div>
-        </div>
-        
-        <div class="flex-1 min-w-0">
-          <span class="text-xs font-bold uppercase tracking-widest text-gray-300">Playlist</span>
-          <h1 class="text-4xl md:text-6xl font-black text-white mt-2 mb-4 truncate">{{ playlist.name }}</h1>
-          <p class="text-gray-300 text-sm md:text-base mb-4 opacity-80">{{ playlist.description }}</p>
-          <div class="flex items-center gap-2 text-sm text-gray-400 font-medium">
-            <span *ngIf="playlist.is_imported" class="bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded">Imported</span>
-            <span>{{ playlist.song_count }} songs</span>
-            <span *ngIf="playlist.total_duration_ms">• {{ formatDuration(playlist.total_duration_ms) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-4 mb-8">
-        <button 
-          (click)="playAll(playlist)"
-          class="w-14 h-14 bg-green-500 hover:bg-green-400 hover:scale-105 active:scale-95 transition-all rounded-full flex items-center justify-center shadow-xl shadow-green-500/20"
-        >
-          <span class="text-black text-2xl ml-1">▶</span>
-        </button>
-      </div>
-
-      <!-- Songs List -->
-      <div class="mt-8">
-        <!-- List Header -->
-        <div class="grid grid-cols-[16px_1fr_auto_80px] md:grid-cols-[16px_1fr_auto_120px_80px] gap-4 px-4 py-2 border-b border-gray-800 text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">
-          <div class="text-center">#</div>
-          <div>Title</div>
-          <div class="hidden md:block">Source</div>
-          <div></div>
-          <div class="text-right flex items-center justify-end">⏱️</div>
-        </div>
-
-        <div *ngIf="!playlist.songs?.length" class="text-center py-20 text-gray-500">
-          <p class="text-lg">This playlist is empty</p>
-          <p class="text-sm mt-2">Find some songs and click "+P" to add them here.</p>
-        </div>
-
-        <!-- Song Item -->
-        <div *ngFor="let song of playlist.songs; let i = index" 
-             class="group grid grid-cols-[16px_1fr_auto_80px] md:grid-cols-[16px_1fr_auto_120px_80px] gap-4 px-4 py-3 rounded-md hover:bg-gray-800/80 transition-colors items-center">
-          
-          <div class="text-center text-sm text-gray-400">
-            <span class="group-hover:hidden">{{ i + 1 }}</span>
-            <button (click)="playSong(song)" class="hidden group-hover:block text-white hover:text-green-500 transition-colors">▶</button>
-          </div>
-
-          <div class="flex items-center gap-3 min-w-0">
-            <img *ngIf="song.cover_url" [src]="song.cover_url" class="w-10 h-10 object-cover rounded bg-gray-800">
-            <div *ngIf="!song.cover_url" class="w-10 h-10 bg-gray-800 rounded flex items-center justify-center">🎵</div>
-            <div class="truncate">
-              <p class="text-white font-medium text-[15px] truncate">{{ song.title }}</p>
-              <p class="text-gray-400 text-sm truncate">{{ song.artist }}</p>
-            </div>
-          </div>
-
-          <div class="hidden md:block">
-            <span class="px-2 py-0.5 text-xs rounded border border-gray-700 text-gray-400 uppercase">{{ song.api_source || 'M' }}</span>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex justify-end gap-2 pr-4 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button (click)="removeSong(playlist._id, song._id)" class="text-gray-400 hover:text-red-500 p-2" title="Remove from playlist">✕</button>
-          </div>
-
-          <div class="text-sm text-gray-400 text-right pr-2">
-            {{ formatDuration(song.duration_ms) || '--:--' }}
-          </div>
-        </div>
-      </div>
-      <div class="h-32"></div> <!-- Spacer for fixed player -->
-    </div>
-  `,
+  templateUrl: './playlist-detail.component.html',
   styles: []
 })
 export class PlaylistDetailComponent implements OnInit {
@@ -113,18 +30,39 @@ export class PlaylistDetailComponent implements OnInit {
 
   playAll(playlist: any) {
     if (!playlist.songs?.length) return;
-    
-    // Send all songs to queue to effectively play the playlist straight
-    // First clear queue, then add all songs.
-    // Instead of chaining, it's easiest to dispatch clearQueue, then sequentially addToQueue.
-    this.store.dispatch(QueueActions.clearQueue());
+    const songIds = playlist.songs.map((s: any) => s._id);
+    this.store.dispatch(QueueActions.replaceQueue({ songIds }));
+    this.showToast('▶️ Playing Playlist');
+  }
+
+  shufflePlay(playlist: any) {
+    if (!playlist.songs?.length) return;
+    const songIds = playlist.songs.map((s: any) => s._id);
+    for (let i = songIds.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [songIds[i], songIds[j]] = [songIds[j], songIds[i]];
+    }
+    this.store.dispatch(QueueActions.replaceQueue({ songIds }));
+    this.showToast('🔀 Shuffled Playlist');
+  }
+
+  addToQueue(playlist: any) {
+    if (!playlist.songs?.length) return;
+    const songIds = playlist.songs.map((s: any) => s._id);
+    this.store.dispatch(QueueActions.addMultipleToQueue({ songIds }));
+    this.showToast(`✅ Added ${songIds.length} songs to Queue`);
+  }
+
+  private showToast(message: string) {
+    const toast = document.createElement('div');
+    toast.className =
+      'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-pulse z-[9999]';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
     setTimeout(() => {
-      playlist.songs.forEach((song: any) => {
-        this.store.dispatch(QueueActions.addToQueue({ songId: song._id }));
-      });
-      // Play the first song instantly
-      this.store.dispatch(QueueActions.playSong({ songId: playlist.songs[0]._id }));
-    }, 100);
+      toast.remove();
+    }, 3000);
   }
 
   playSong(song: any) {

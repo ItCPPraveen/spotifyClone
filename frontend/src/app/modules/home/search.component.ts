@@ -2,9 +2,12 @@ import { Component, OnInit, OnDestroy, ElementRef, HostListener } from '@angular
 import { Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { songsSelectors, SongsActions } from '@store/songs';
+import { SongsActions, songsSelectors } from '@store/songs';
 import { QueueActions } from '@store/queue';
+import * as PlaylistsActions from '@store/playlists/playlists.actions';
+import { selectPlaylists } from '@store/playlists/playlists.selectors';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '@environments/environment';
 
 interface ITunesResult {
   trackName: string;
@@ -13,87 +16,7 @@ interface ITunesResult {
 
 @Component({
   selector: 'app-search',
-  template: `
-    <div>
-      <h1 class="text-4xl font-bold mb-8">🎵 Search Songs</h1>
-
-      <!-- Search Input -->
-      <div class="mb-8 relative">
-        <input
-          type="text"
-          placeholder="Search songs, artists..."
-          (input)="onInput(searchInput.value)"
-          (focus)="showSuggestions = true"
-          (keyup.enter)="search(searchInput.value)"
-          #searchInput
-          class="w-full px-6 py-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <p class="text-gray-400 text-sm mt-2">
-          Search across Spotify, Deezer, and local cache
-        </p>
-
-        <!-- Suggestions Dropdown -->
-        <div *ngIf="showSuggestions && suggestions.length > 0" 
-             class="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden">
-          <ul class="py-1">
-            <li *ngFor="let suggestion of suggestions" 
-                (mousedown)="selectSuggestion(suggestion, searchInput)"
-                class="px-4 py-3 hover:bg-gray-700 cursor-pointer flex flex-col transition-colors">
-              <span class="text-white font-medium">{{ suggestion.trackName }}</span>
-              <span class="text-gray-400 text-sm">{{ suggestion.artistName }}</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div *ngIf="loading$ | async" class="text-center py-12">
-        <p class="text-gray-400">🔍 Searching across all sources...</p>
-        <div class="flex justify-center gap-2 mt-4">
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
-          <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
-        </div>
-      </div>
-
-      <!-- Error State -->
-      <div *ngIf="error$ | async as error" class="bg-red-900/30 border border-red-600 rounded p-4 mb-4">
-        <p class="text-red-400">❌ Error: {{ error }}</p>
-      </div>
-
-      <!-- Sources Info -->
-      <div *ngIf="(sources$ | async) as sources" class="mb-6 flex gap-2 flex-wrap">
-        <span class="px-3 py-1 bg-blue-900/50 text-blue-300 text-xs rounded">
-          🗄️ {{ sources.includes('mongodb_cache') ? 'Cache' : '' }}
-        </span>
-        <span
-          *ngIf="sources.includes('spotify')"
-          class="px-3 py-1 bg-green-900/50 text-green-300 text-xs rounded"
-        >
-          🎵 Spotify
-        </span>
-        <span
-          *ngIf="sources.includes('deezer')"
-          class="px-3 py-1 bg-orange-900/50 text-orange-300 text-xs rounded"
-        >
-          🎼 Deezer
-        </span>
-      </div>
-
-      <!-- Songs Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <app-song-card
-          *ngFor="let song of songs$ | async"
-          [song]="song"
-        ></app-song-card>
-      </div>
-
-      <!-- Empty State -->
-      <div *ngIf="(songs$ | async)?.length === 0 && !(loading$ | async)" class="text-center py-12">
-        <p class="text-gray-400 text-lg">Start searching to discover music!</p>
-      </div>
-    </div>
-  `,
+  templateUrl: './search.component.html',
   styles: []
 })
 export class SearchComponent implements OnInit, OnDestroy {
@@ -101,6 +24,10 @@ export class SearchComponent implements OnInit, OnDestroy {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
   sources$: Observable<string[]>;
+
+  playlists$: Observable<any[]>;
+  ytPlaylists: any[] = [];
+  ytPlaylistsLoading = false;
 
   suggestions: ITunesResult[] = [];
   showSuggestions = false;
@@ -117,11 +44,13 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.loading$ = this.store.select(songsSelectors.selectLoading);
     this.error$ = this.store.select(songsSelectors.selectError);
     this.sources$ = this.store.select(songsSelectors.selectSources);
+    this.playlists$ = this.store.select(selectPlaylists);
   }
 
   ngOnInit() {
     // Load recent songs initially
     this.store.dispatch(SongsActions.getRecentSongs());
+    this.store.dispatch(PlaylistsActions.getUserPlaylists());
 
     // Set up search debouncing for iTunes API
     this.searchSubject.pipe(
@@ -174,9 +103,20 @@ export class SearchComponent implements OnInit, OnDestroy {
   search(query: string) {
     if (query.trim()) {
       this.store.dispatch(SongsActions.searchSongs({ query }));
+      
+      // Fetch YouTube Playlists
+      this.ytPlaylistsLoading = true;
+      this.http.get<any[]>(`${environment.apiUrl}/playlists/search/youtube?q=${encodeURIComponent(query)}`).subscribe({
+        next: (res) => {
+          this.ytPlaylists = res;
+          this.ytPlaylistsLoading = false;
+        },
+        error: () => this.ytPlaylistsLoading = false
+      });
     } else {
       // Restore recent songs if search is cleared
       this.store.dispatch(SongsActions.getRecentSongs());
+      this.ytPlaylists = [];
     }
   }
 

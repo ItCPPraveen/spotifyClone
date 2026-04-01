@@ -15,3 +15,8 @@ export const playPrevious = createAction('[Queue] Play Previous');
 export const setSleepTimer = createAction('[Queue] Set Sleep Timer', props<{ durationMinutes: number }>());
 export const setSleepTimerSuccess = createAction('[Queue] Set Sleep Timer Success', props<{ expiresAt: Date }>());
 export const reorderQueue = createAction('[Queue] Reorder Queue', props<{ previousIndex: number; currentIndex: number }>());
+
+export const replaceQueue = createAction('[Queue] Replace Queue', props<{ songIds: string[] }>());
+export const addMultipleToQueue = createAction('[Queue] Add Multiple To Queue', props<{ songIds: string[] }>());
+
+export const setTransientQueue = createAction('[Queue] Set Transient Queue', props<{ songs: any[], currentIndex: number }>());

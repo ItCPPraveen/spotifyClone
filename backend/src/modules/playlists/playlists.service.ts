@@ -60,6 +60,16 @@ export class PlaylistsService {
         return playlist;
     }
 
+    async searchYouTubePlaylists(query: string): Promise<any[]> {
+        return this.youTubeService.searchPlaylists(query);
+    }
+
+    async getYouTubePlaylistItems(playlistId: string): Promise<{ playlist: any, tracks: any[] }> {
+        const playlist = await this.youTubeService.getPlaylist(playlistId);
+        const tracks = await this.youTubeService.getPlaylistTracks(playlistId);
+        return { playlist, tracks };
+    }
+
     async importPlaylist(
         userId: string,
         dto: ImportPlaylistDto,
